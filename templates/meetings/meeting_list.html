@@ -1,52 +1,81 @@
 <!-- templates/meetings/meeting_list.html -->
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>會議列表</title>
+    <style>
+        .pagination { margin: 10px 0; }
+        .pagination a { padding: 5px 10px; margin: 0 5px; text-decoration: none; color: #007bff; }
+        .pagination a.active { font-weight: bold; color: #000; }
+        .filter-form { margin: 10px 0; }
+    </style>
 </head>
-
 <body>
     <h1>會議列表</h1>
-    <p>這裡是所有會議的列表。</p>
 
-    <!-- 分頁導航 -->
-    {% if page_obj %}
-    <ul>
-        {% for meeting in page_obj %}
-        <li>
-            <a href="{% url 'meetings:meeting_detail' meeting.id %}">
-                {{ meeting.title }} ({{ meeting.date }})
-            </a>
-            <a href="{% url 'meetings:upload_attachment' meeting.id %}">上傳附件</a>
-        </li>
-        {% endfor %}
-    </ul>
-
-    <!-- 分頁導航 -->
-    <div class="pagination">
-        {% if page_obj.has_previous %}
-        <a href="?page=1">&laquo; 首页</a>
-        <a href="?page={{ page_obj.previous_page_number }}">上一页</a>
-        {% endif %}
-
-        {% for num in page_obj.paginator.page_range %}
-        <a href="?page={{ num }}" class="{% if page_obj.number == num %}active{% endif %}">{{ num }}</a>
-        {% endfor %}
-
-        {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}">下一页</a>
-        <a href="?page={{ page_obj.paginator.num_pages }}">&raquo; 末页</a>
-        {% endif %}
-        <span>共 {{ page_obj.paginator.num_pages }} 页，当前第 {{ page_obj.number }} 页</span>
+    <!-- 搜索和過濾表單 -->
+    <div class="filter-form">
+        <form method="get">
+            <input type="text" name="q" value="{{ search_query|default:'' }}" placeholder="搜索標題或參加人...">
+            <input type="date" name="date" value="{{ date_filter|default:'' }}" placeholder="過濾日期...">
+            <input type="text" name="location" value="{{ location_filter|default:'' }}" placeholder="過濾地點...">
+            <select name="sort">
+                <option value="-date" {% if sort_by == '-date' %}selected{% endif %}>日期降序</option>
+                <option value="date" {% if sort_by == 'date' %}selected{% endif %}>日期升序</option>
+                <option value="-title" {% if sort_by == '-title' %}selected{% endif %}>標題降序</option>
+                <option value="title" {% if sort_by == 'title' %}selected{% endif %}>標題升序</option>
+            </select>
+            <button type="submit">應用</button>
+            <a href="{% url 'meetings:meeting_list' %}">重置</a>
+        </form>
     </div>
+
+    {% if page_obj %}
+        <form method="post" action="{% url 'meetings:delete_selected_meetings' %}" class="delete-form" onsubmit="return confirm('確定刪除所選會議？');">
+            {% csrf_token %}
+            <ul>
+            {% for meeting in page_obj %}
+                <li>
+                    <input type="checkbox" name="selected_meetings" value="{{ meeting.id }}">
+                    <a href="{% url 'meetings:meeting_detail' meeting.id %}">
+                        {{ meeting.title }} ({{ meeting.date }})
+                    </a>
+                    <a href="{% url 'meetings:upload_attachment' meeting.id %}">上傳附件</a>
+                    <a href="{% url 'meetings:delete_meeting' meeting.id %}" onclick="return confirm('確定刪除此會議？')">清除</a>
+                </li>
+            {% endfor %}
+            </ul>
+            <button type="submit">清除所有選中項目</button>
+        </form>
+
+        <!-- 顯示每頁數量和總數 -->
+        <p>每頁顯示 {{ page_obj.paginator.per_page }} 筆記錄，總計 {{ page_obj.paginator.count }} 筆記錄</p>
+        <p>當前顯示第 {{ page_obj.start_index }} 到 {{ page_obj.end_index }} 筆記錄</p>
+        
+        <!-- 分頁導航 -->
+        <div class="pagination">
+            {% if page_obj.has_previous %}
+                <a href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if date_filter %}date={{ date_filter }}&{% endif %}{% if location_filter %}location={{ location_filter }}&{% endif %}page=1">« 第一頁</a>
+                <a href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if date_filter %}date={{ date_filter }}&{% endif %}{% if location_filter %}location={{ location_filter }}&{% endif %}page={{ page_obj.previous_page_number }}">上一頁</a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                <a href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if date_filter %}date={{ date_filter }}&{% endif %}{% if location_filter %}location={{ location_filter }}&{% endif %}sort={{ sort_by }}&page={{ num }}"
+                   class="{% if page_obj.number == num %}active{% endif %}">{{ num }}</a>
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <a href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if date_filter %}date={{ date_filter }}&{% endif %}{% if location_filter %}location={{ location_filter }}&{% endif %}page={{ page_obj.next_page_number }}">下一頁</a>
+                <a href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if date_filter %}date={{ date_filter }}&{% endif %}{% if location_filter %}location={{ location_filter }}&{% endif %}page={{ page_obj.paginator.num_pages }}">» 最後一頁</a>
+            {% endif %}
+            <span>共 {{ page_obj.paginator.num_pages }} 頁，當前第 {{ page_obj.number }} 頁</span>
+        </div>
     {% else %}
-    <p>暫無會議記錄。</p>
+        <p>暫無會議記錄。</p>
     {% endif %}
+
     <a href="{% url 'pages:home' %}">返回首頁</a> |
     <a href="{% url 'meetings:import_meetings' %}">導入會議</a> |
     <a href="{% url 'meetings:export_meetings' %}">導出會議</a>
-
 </body>
-
 </html>

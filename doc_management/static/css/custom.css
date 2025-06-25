@@ -1,3 +1,13 @@
-pagination { margin: 10px 0; }
-pagination a { padding: 5px 10px; margin: 0 5px; text-decoration: none; color: #007bff; }
-pagination a.active { font-weight: bold; color: #000; }
+/* pagination */
+.pagination { margin: 10px 0; }
+.pagination a { padding: 5px 10px; margin: 0 5px; text-decoration: none; color: #007bff; }
+.pagination a.active { font-weight: bold; color: #000; }
+
+/* clear button */
+a.clear-btn { color: #dc3545; margin-left: 10px; }
+a.clear-btn:hover { text-decoration: underline; }
+
+
+/* form styles */
+.filter-form { margin: 10px 0; }
+.delete-form { margin: 10px 0; }

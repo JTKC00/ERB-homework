@@ -3,18 +3,27 @@ from import_export import resources
 from .models import Meeting, AgendaItem, Attachment
 from import_export.fields import Field
 
-class MeetingResource(resources.ModelResource):
+class MeetingWithDetailsResource(resources.ModelResource):
+    agenda_items = Field(column_name='Agenda Items')
+    attachments = Field(column_name='Attachments')
+
     class Meta:
         model = Meeting
-        fields = ('title', 'date', 'start_time', 'end_time', 'location', 'attendees', 'minutes')
-        import_id_fields = ('title',)  # 用於匹配現有記錄
+        fields = ('id', 'title', 'date', 'start_time', 'end_time', 'location', 'attendees', 'minutes', 'agenda_items', 'attachments')
+        export_order = ('id', 'title', 'date', 'start_time', 'end_time', 'location', 'attendees', 'minutes', 'agenda_items', 'attachments')
 
-class AgendaItemResource(resources.ModelResource):
-    class Meta:
-        model = AgendaItem
-        fields = ('meeting', 'item_number', 'item_title', 'description', 'responsible_person', 'estimated_time')
+    def dehydrate_agenda_items(self, meeting):
+        # 獲取所有議程項並格式化，添加調試
+        agenda_items = AgendaItem.objects.filter(meeting=meeting)
+        print(f"Debug: Meeting {meeting.id} has {agenda_items.count()} agenda items")
+        if agenda_items.exists():
+            return "; ".join([f"{item.item_number}. {item.item_title} (負責人: {item.responsible_person})" for item in agenda_items])
+        return "無議程項"
 
-class AttachmentResource(resources.ModelResource):
-    class Meta:
-        model = Attachment
-        fields = ('meeting', 'file')
+    def dehydrate_attachments(self, meeting):
+        # 獲取所有附件並格式化，添加調試
+        attachments = Attachment.objects.filter(meeting=meeting)
+        print(f"Debug: Meeting {meeting.id} has {attachments.count()} attachments")
+        if attachments.exists():
+            return "; ".join([attachment.file.name for attachment in attachments])
+        return "無附件"

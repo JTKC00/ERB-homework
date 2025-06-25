@@ -1,3 +1,12 @@
 <!-- templates/import/import_success.html -->
-<p>會議導入成功！</p>
-<a href="{% url 'meetings:meeting_list' %}">返回會議列表</a>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>導入成功</title>
+</head>
+<body>
+    <h1>會議導入成功！</h1>
+    <p>成功導入了 {{ imported_count }} 筆會議。</p>
+    <a href="{% url 'meetings:meeting_list' %}">返回會議列表</a>
+</body>
+</html>

@@ -1,9 +1,11 @@
 <!-- templates/meetings/meeting_detail.html -->
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>{{ meeting.title }}</title>
 </head>
+
 <body>
     <h1>{{ meeting.title }}</h1>
     <p><strong>日期:</strong> {{ meeting.date }}</p>
@@ -14,28 +16,33 @@
 
     <h2>議程</h2>
     {% if agenda_items %}
-        <ul>
+    <ul>
         {% for item in agenda_items %}
-            <li>{{ item.item_number }}. {{ item.item_title }} - {{ item.description }} (負責人: {{ item.responsible_person }}, 時間: {{ item.estimated_time }})</li>
+        <li>{{ item.item_number }}. {{ item.item_title }} - {{ item.description }} (負責人: {{ item.responsible_person }},
+            時間: {{ item.estimated_time }})</li>
         {% endfor %}
-        </ul>
+    </ul>
     {% else %}
-        <p>暫無議程。</p>
+    <p>暫無議程。</p>
     {% endif %}
 
     <h2>附件</h2>
     {% if attachments %}
-        <ul>
+    <ul>
         {% for attachment in attachments %}
-            <li><a href="{{ attachment.file.url }}">{{ attachment.file.name }}</a> (上傳時間: {{ attachment.uploaded_at|default:"未知" }})</li>
+        <li><a href="{{ attachment.file.url }}">{{ attachment.file.name }}</a> (上傳時間: {{
+            attachment.uploaded_at|default:"未知" }})</li>
         {% endfor %}
-        </ul>
+    </ul>
     {% else %}
-        <p>暫無附件。</p>
+    <p>暫無附件。</p>
     {% endif %}
 
     <a href="{% url 'meetings:upload_attachment' meeting.id %}">上傳新附件</a> |
-    <a href="{% url 'meetings:generate_doc' meeting.id %}">生成 Word 文件</a> |
-    <a href="{% url 'home' %}">返回首頁</a>
+    <a href="{% url 'meetings:generate_meeting_doc' meeting.id %}">生成 Word 文件</a> |
+<a href="{% url 'meetings:delete_meeting' meeting.id %}" class="clear-btn" onclick="return confirm('確定刪除此會議？')">清除</a> |
+    <a href="{% url 'meetings:meeting_list' %}">返回會議列表</a> |
+    <a href="{% url 'pages:home' %}">返回首頁</a>
 </body>
+
 </html>

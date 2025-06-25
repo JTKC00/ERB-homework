@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>確認刪除</title>
+</head>
+<body>
+    <h1>確認刪除會議</h1>
+    <p>您確定要刪除會議「{{ meeting.title }}」嗎？此操作無法復原。</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit">確認刪除</button>
+        <a href="{% url 'meetings:meeting_list' %}">取消</a>
+    </form>
+</body>
+</html>
