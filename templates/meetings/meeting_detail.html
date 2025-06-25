@@ -1,0 +1,41 @@
+<!-- templates/meetings/meeting_detail.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ meeting.title }}</title>
+</head>
+<body>
+    <h1>{{ meeting.title }}</h1>
+    <p><strong>日期:</strong> {{ meeting.date }}</p>
+    <p><strong>時間:</strong> {{ meeting.start_time }} - {{ meeting.end_time }}</p>
+    <p><strong>地點:</strong> {{ meeting.location }}</p>
+    <p><strong>參加人:</strong> {{ meeting.attendees }}</p>
+    <p><strong>記錄:</strong> {{ meeting.minutes|default:"無記錄" }}</p>
+
+    <h2>議程</h2>
+    {% if agenda_items %}
+        <ul>
+        {% for item in agenda_items %}
+            <li>{{ item.item_number }}. {{ item.item_title }} - {{ item.description }} (負責人: {{ item.responsible_person }}, 時間: {{ item.estimated_time }})</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>暫無議程。</p>
+    {% endif %}
+
+    <h2>附件</h2>
+    {% if attachments %}
+        <ul>
+        {% for attachment in attachments %}
+            <li><a href="{{ attachment.file.url }}">{{ attachment.file.name }}</a> (上傳時間: {{ attachment.uploaded_at|default:"未知" }})</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>暫無附件。</p>
+    {% endif %}
+
+    <a href="{% url 'meetings:upload_attachment' meeting.id %}">上傳新附件</a> |
+    <a href="{% url 'meetings:generate_doc' meeting.id %}">生成 Word 文件</a> |
+    <a href="{% url 'home' %}">返回首頁</a>
+</body>
+</html>

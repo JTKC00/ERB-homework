@@ -1,0 +1,31 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>會議資料整理系統</title>
+</head>
+<body>
+    <h1>歡迎使用會議資料整理系統</h1>
+    <p>這裡是您的會議管理中心。</p>
+
+    <h2>最近會議</h2>
+    {% if recent_meetings %}
+        <ul>
+        {% for meeting in recent_meetings %}
+            <li><a href="{% url 'meetings:meeting_detail' meeting.id %}">{{ meeting.title }} ({{ meeting.date }})</a></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>暫無會議記錄。</p>
+    {% endif %}
+
+    <a href="{% url 'admin:index' %}">管理後台</a> |
+    <a href="{% url 'meetings:meeting_list' %}">查看會議</a> |
+    <a href="{% url 'meetings:export_meetings' %}" class="btn btn-primary">導出會議</a>
+<form action="{% url 'meetings:import_meetings' %}" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="file" required>
+    <button type="submit" class="btn btn-success">導入會議</button>
+</form>
+</body>
+</html>

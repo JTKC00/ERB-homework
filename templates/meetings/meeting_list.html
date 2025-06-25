@@ -1,0 +1,52 @@
+<!-- templates/meetings/meeting_list.html -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>會議列表</title>
+</head>
+
+<body>
+    <h1>會議列表</h1>
+    <p>這裡是所有會議的列表。</p>
+
+    <!-- 分頁導航 -->
+    {% if page_obj %}
+    <ul>
+        {% for meeting in page_obj %}
+        <li>
+            <a href="{% url 'meetings:meeting_detail' meeting.id %}">
+                {{ meeting.title }} ({{ meeting.date }})
+            </a>
+            <a href="{% url 'meetings:upload_attachment' meeting.id %}">上傳附件</a>
+        </li>
+        {% endfor %}
+    </ul>
+
+    <!-- 分頁導航 -->
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page=1">&laquo; 首页</a>
+        <a href="?page={{ page_obj.previous_page_number }}">上一页</a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+        <a href="?page={{ num }}" class="{% if page_obj.number == num %}active{% endif %}">{{ num }}</a>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">下一页</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}">&raquo; 末页</a>
+        {% endif %}
+        <span>共 {{ page_obj.paginator.num_pages }} 页，当前第 {{ page_obj.number }} 页</span>
+    </div>
+    {% else %}
+    <p>暫無會議記錄。</p>
+    {% endif %}
+    <a href="{% url 'pages:home' %}">返回首頁</a> |
+    <a href="{% url 'meetings:import_meetings' %}">導入會議</a> |
+    <a href="{% url 'meetings:export_meetings' %}">導出會議</a>
+
+</body>
+
+</html>

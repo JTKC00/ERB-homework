@@ -1,0 +1,6 @@
+<!-- templates/import_form.html -->
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="file" required>
+    <button type="submit">上傳</button>
+</form>

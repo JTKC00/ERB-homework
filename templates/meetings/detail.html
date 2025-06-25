@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head><title>會議詳情</title></head>
+<body>
+    <h1>{{ meeting.title }}</h1>
+    <p>日期: {{ meeting.date }}</p>
+    <p>時間: {{ meeting.start_time }} - {{ meeting.end_time }}</p>
+    <p>地點: {{ meeting.location }}</p>
+    <p>參加人: {{ meeting.attendees }}</p>
+    <p>記錄: {{ meeting.minutes|default:"無記錄" }}</p>
+
+    <h2>議程</h2>
+    {% for item in agenda_items %}
+        <p>{{ item.item_number }}. {{ item.item_title }} - {{ item.description }} (負責人: {{ item.responsible_person }}, 時間: {{ item.estimated_time }})</p>
+    {% endfor %}
+
+    <h2>附件</h2>
+    {% for attachment in attachments %}
+        <a href="{{ attachment.file.url }}">{{ attachment.file.name }}</a> (上傳時間: {{ attachment.uploaded_at }})
+    {% endfor %}
+    <a href="{% url 'meetings:upload_attachment' meeting.id %}">上傳附件</a>
+    <a href="{% url 'meetings:generate_doc' meeting.id %}">生成Word文件</a>
+</body>
+</html>

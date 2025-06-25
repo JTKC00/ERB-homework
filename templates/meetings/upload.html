@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head><title>上傳附件</title></head>
+<body>
+    <h1>上傳附件 - 會議 ID: {{ meeting_id }}</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="attachment_file">
+        <button type="submit">上傳</button>
+    </form>
+    <a href="{% url 'meetings:meeting_detail' meeting_id %}">返回</a>
+</body>
+</html>
