@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from django.utils.text import slugify
 from faker import Faker
 import os
 from django.core.files import File
@@ -56,11 +57,11 @@ class Command(BaseCommand):
 
             # 創建假會議數據
             meeting = Meeting.objects.create(
-                title=current_faker.sentence(),  # 生成標題
+                title=current_faker.sentence()[:190],  # 限制標題長度，留10字元緩衝
                 date=meeting_date,  # 使用結合的日期
                 start_time=start_time,  # 使用原始時間
                 end_time=end_datetime.time(),  # 提取時間部分
-                location=current_faker.city(),  # 生成地點
+                location=current_faker.city()[:90],  # 限制地點長度，留10字元緩衝
                 attendees=attendees,  # 使用生成的參加人名單
                 minutes=current_faker.paragraph()  # 生成會議記錄
             )
@@ -70,20 +71,25 @@ class Command(BaseCommand):
                 AgendaItem.objects.create(
                     meeting=meeting,
                     item_number=j + 1,
-                    item_title=current_faker.sentence(),
+                    item_title=current_faker.sentence()[:190],  # 限制議程標題長度
                     description=current_faker.paragraph(),
-                    responsible_person=current_faker.name(),
+                    responsible_person=current_faker.name()[:90],  # 限制負責人名稱長度
                     estimated_time=timedelta(minutes=current_faker.random_int(min=10, max=30))
                 )
 
             # 創建假附件
+            # 創建有意義的檔案名稱：日期_會議標題_附件
+            date_str = meeting_date.strftime('%Y%m%d')
+            title_slug = slugify(meeting.title)[:30]  # 限制標題長度，避免檔名過長
+            meaningful_filename = f"{date_str}_{title_slug}_attachment.txt"
+            
             temp_file = f"temp_{current_faker.uuid4()}.txt"  # 臨時文件名稱
-            with open(temp_file, 'w') as f:
+            with open(temp_file, 'w', encoding='utf-8') as f:
                 f.write(current_faker.text())  # 寫入假文本
             with open(temp_file, 'rb') as f:
                 attachment = Attachment.objects.create(
                     meeting=meeting,
-                    file=File(f, name=f"attachment_{current_faker.uuid4()}.txt")
+                    file=File(f, name=meaningful_filename)
                 )
             os.remove(temp_file)  # 清理臨時文件
 

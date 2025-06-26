@@ -1,6 +1,24 @@
 <!-- templates/import_form.html -->
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    <input type="file" name="file" required>
-    <button type="submit">上傳</button>
-</form>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>匯入會議資料</title>
+</head>
+<body>
+    <h1>匯入會議資料</h1>
+    <p>支援的檔案格式：</p>
+    <ul>
+        <li><strong>ZIP 檔案</strong>：包含 meetings.csv 和 attachments 資料夾的完整匯出檔案</li>
+        <li><strong>CSV 檔案</strong>：純會議資料（不含附件檔案）</li>
+    </ul>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="file">選擇檔案：</label>
+        <input type="file" name="file" id="file" accept=".zip,.csv" required>
+        <button type="submit">上傳並匯入</button>
+    </form>
+    
+    <p><a href="{% url 'meetings:meeting_list' %}">返回會議列表</a></p>
+</body>
+</html>

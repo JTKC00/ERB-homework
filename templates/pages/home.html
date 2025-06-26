@@ -21,11 +21,7 @@
 
     <a href="{% url 'admin:index' %}">管理後台</a> |
     <a href="{% url 'meetings:meeting_list' %}">查看會議</a> |
-    <a href="{% url 'meetings:export_meetings' %}" class="btn btn-primary">導出會議</a>
-<form action="{% url 'meetings:import_meetings' %}" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    <input type="file" name="file" required>
-    <button type="submit" class="btn btn-success">導入會議</button>
-</form>
+    <a href="{% url 'meetings:export_meetings' %}" class="btn btn-primary">導出會議 (ZIP)</a> |
+    <a href="{% url 'meetings:import_meetings' %}" class="btn btn-success">匯入會議 (ZIP/CSV)</a>
 </body>
 </html>

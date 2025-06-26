@@ -11,3 +11,7 @@ a.clear-btn:hover { text-decoration: underline; }
 /* form styles */
 .filter-form { margin: 10px 0; }
 .delete-form { margin: 10px 0; }
+
+/* delete button */
+.delete-button { background-color: #dc3545; color: white; padding: 5px 10px; text-decoration: none; }
+.delete-button:hover { background-color: #c82333; }

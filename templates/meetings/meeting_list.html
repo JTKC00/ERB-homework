@@ -3,12 +3,6 @@
 <html>
 <head>
     <title>會議列表</title>
-    <style>
-        .pagination { margin: 10px 0; }
-        .pagination a { padding: 5px 10px; margin: 0 5px; text-decoration: none; color: #007bff; }
-        .pagination a.active { font-weight: bold; color: #000; }
-        .filter-form { margin: 10px 0; }
-    </style>
 </head>
 <body>
     <h1>會議列表</h1>
@@ -74,6 +68,11 @@
         <p>暫無會議記錄。</p>
     {% endif %}
 
+    <!-- 刪除全部按鈕 -->
+    <form method="post" action="{% url 'meetings:delete_all_meetings' %}" style="display:inline;">
+        {% csrf_token %}
+        <button type="submit" class="delete-button" onclick="return confirm('確定要刪除所有會議？此操作無法復原！');">刪除全部</button>
+    </form> |
     <a href="{% url 'pages:home' %}">返回首頁</a> |
     <a href="{% url 'meetings:import_meetings' %}">導入會議</a> |
     <a href="{% url 'meetings:export_meetings' %}">導出會議</a>
