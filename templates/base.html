@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}會議管理系統{% endblock %}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/tech-style.css">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav class="tech-navbar">
+        <div class="tech-nav-container">
+            <a href="{% url 'pages:home' %}" class="tech-brand">
+                <i class="fas fa-calendar-alt"></i> 會議管理系統
+            </a>
+            <ul class="tech-nav-list">
+                <li><a href="{% url 'meetings:meeting_list' %}" class="tech-nav-link">會議列表</a></li>
+                <li><a href="{% url 'meetings:import_meetings' %}" class="tech-nav-link">匯入資料</a></li>
+                <li><a href="{% url 'meetings:export_meetings' %}" class="tech-nav-link">匯出資料</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- 主要內容 -->
+    <main class="tech-main">
+        <div class="tech-container">
+            {% if messages %}
+                <div class="tech-messages">
+                    {% for message in messages %}
+                        <div class="tech-alert tech-alert-{{ message.tags }}">
+                            <div class="tech-alert-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="tech-alert-content">
+                                {{ message }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <!-- 頁尾 -->
+    <footer class="tech-footer">
+        <div class="tech-footer-content">
+            <div class="tech-footer-column">
+                <h3 class="tech-footer-title">關於系統</h3>
+                <p>會議資料管理系統提供完整的會議記錄、議程和附件管理功能。</p>
+            </div>
+            <div class="tech-footer-column">
+                <h3 class="tech-footer-title">快速連結</h3>
+                <ul class="tech-footer-list">
+                    <li><a href="{% url 'pages:home' %}">首頁</a></li>
+                    <li><a href="{% url 'meetings:meeting_list' %}">會議列表</a></li>
+                    <li><a href="{% url 'meetings:import_meetings' %}">匯入資料</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="tech-footer-bottom">
+            <p>&copy; 2025 會議管理系統 - 特別鳴謝導師: Mr. Wai Lung Aaron</p>
+        </div>
+    </footer>
+
+    <!-- JS腳本 -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

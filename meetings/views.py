@@ -45,7 +45,7 @@ def upload_attachment(request, meeting_id):
         
         attachment = Attachment(meeting=meeting)
         attachment.file.save(meaningful_filename, uploaded_file, save=True)
-        return redirect('meeting_detail', meeting_id=meeting.id)
+        return redirect('meetings:meeting_detail', meeting_id=meeting.id)
     return render(request, 'meetings/upload.html', {'meeting_id': meeting_id})
 
 def export_meetings(request):
@@ -466,3 +466,23 @@ def generate_meeting_doc(request, meeting_id):
             os.rmdir(temp_dir)
         if os.path.exists(zip_path):
             os.remove(zip_path)
+
+def delete_attachment(request, attachment_id):
+    """刪除指定的附件"""
+    attachment = get_object_or_404(Attachment, id=attachment_id)
+    meeting_id = attachment.meeting.id
+    
+    if request.method == 'POST':
+        # 先刪除實際檔案（如果存在）
+        try:
+            if attachment.file and hasattr(attachment.file, 'path') and os.path.exists(attachment.file.path):
+                os.remove(attachment.file.path)
+        except Exception as e:
+            messages.warning(request, f"刪除檔案時發生問題: {str(e)}")
+        
+        # 然後刪除資料庫記錄
+        attachment.delete()
+        messages.success(request, "附件已成功刪除")
+        
+    # 無論是 GET 還是 POST 請求，都會重定向回會議詳情頁
+    return redirect('meetings:meeting_detail', meeting_id=meeting_id)

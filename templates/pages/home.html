@@ -1,27 +1,129 @@
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>會議資料整理系統</title>
-</head>
-<body>
-    <h1>歡迎使用會議資料整理系統</h1>
-    <p>這裡是您的會議管理中心。</p>
+{% extends "base.html" %}
 
-    <h2>最近會議</h2>
+{% block title %}首頁 | 會議資料整理系統{% endblock %}
+
+{% block content %}
+<div class="tech-header">
+    <div class="tech-header-icon">
+        <i class="fas fa-home"></i>
+    </div>
+    <h1 class="tech-title">歡迎使用會議資料整理系統</h1>
+</div>
+
+<!-- 系統介紹 -->
+<div class="tech-section">
+    <div class="tech-card">
+        <h2 class="tech-subtitle"><i class="fas fa-info-circle"></i> 系統概述</h2>
+        <p class="tech-card-content">
+            會議資料整理系統提供完整的會議記錄、議程管理、附件上傳和資料匯入匯出功能。透過本系統，您可以簡單有效地管理所有會議相關資訊，並實現資料的便捷分享和備份。
+        </p>
+    </div>
+</div>
+
+<!-- 統計數據 -->
+<div class="tech-stats">
+    <div class="tech-stat-card">
+        <div class="tech-stat-icon">
+            <i class="fas fa-calendar-alt"></i>
+        </div>
+        <div class="tech-stat-value">{{ meetings_count }}</div>
+        <div class="tech-stat-label">會議總數</div>
+    </div>
+    <div class="tech-stat-card">
+        <div class="tech-stat-icon">
+            <i class="fas fa-paperclip"></i>
+        </div>
+        <div class="tech-stat-value">{{ attachments_count|default:"0" }}</div>
+        <div class="tech-stat-label">檔案附件</div>
+    </div>
+    <div class="tech-stat-card">
+        <div class="tech-stat-icon">
+            <i class="fas fa-tasks"></i>
+        </div>
+        <div class="tech-stat-value">{{ agenda_items_count|default:"0" }}</div>
+        <div class="tech-stat-label">議程項目</div>
+    </div>
+</div>
+
+<!-- 最近會議 -->
+<div class="tech-section" style="margin-top: 30px;">
+    <h2 class="tech-subtitle"><i class="fas fa-clock"></i> 最近會議</h2>
+    
     {% if recent_meetings %}
-        <ul>
-        {% for meeting in recent_meetings %}
-            <li><a href="{% url 'meetings:meeting_detail' meeting.id %}">{{ meeting.title }} ({{ meeting.date }})</a></li>
-        {% endfor %}
-        </ul>
+        <table class="tech-table">
+            <thead>
+                <tr>
+                    <th>會議標題</th>
+                    <th>日期</th>
+                    <th>地點</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for meeting in recent_meetings %}
+                <tr>
+                    <td>
+                        <a href="{% url 'meetings:meeting_detail' meeting.id %}" class="tech-card-title">
+                            {{ meeting.title }}
+                        </a>
+                    </td>
+                    <td>{{ meeting.date }}</td>
+                    <td>{{ meeting.location }}</td>
+                    <td>
+                        <a href="{% url 'meetings:meeting_detail' meeting.id %}" class="tech-btn tech-btn-sm">
+                            <i class="fas fa-eye"></i> 查看
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     {% else %}
-        <p>暫無會議記錄。</p>
+        <div class="tech-alert tech-alert-info">
+            <div class="tech-alert-icon">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="tech-alert-content">
+                <p>暫無會議記錄。您可以匯入資料或從管理後台新增會議。</p>
+            </div>
+        </div>
     {% endif %}
+</div>
 
-    <a href="{% url 'admin:index' %}">管理後台</a> |
-    <a href="{% url 'meetings:meeting_list' %}">查看會議</a> |
-    <a href="{% url 'meetings:export_meetings' %}" class="btn btn-primary">導出會議 (ZIP)</a> |
-    <a href="{% url 'meetings:import_meetings' %}" class="btn btn-success">匯入會議 (ZIP/CSV)</a>
-</body>
-</html>
+<!-- 快速操作 -->
+<div class="tech-section">
+    <h2 class="tech-subtitle"><i class="fas fa-rocket"></i> 快速操作</h2>
+    <div class="tech-grid" style="grid-template-columns: repeat(2, 1fr);">
+        <div class="tech-card">
+            <h3 class="tech-card-title"><i class="fas fa-file-import"></i> 資料匯入</h3>
+            <p class="tech-card-content">匯入 ZIP 或 CSV 檔案，快速新增會議資料和附件。</p>
+            <a href="{% url 'meetings:import_meetings' %}" class="tech-btn tech-btn-block" style="margin-top: 15px;">
+                匯入會議資料
+            </a>
+        </div>
+        <div class="tech-card">
+            <h3 class="tech-card-title"><i class="fas fa-file-export"></i> 資料匯出</h3>
+            <p class="tech-card-content">將所有會議資料和附件打包為 ZIP 檔案，方便備份。</p>
+            <a href="{% url 'meetings:export_meetings' %}" class="tech-btn tech-btn-success tech-btn-block" style="margin-top: 15px;">
+                匯出會議資料
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- 管理區塊 -->
+<div class="tech-section">
+    <h2 class="tech-subtitle"><i class="fas fa-cogs"></i> 系統管理</h2>
+    <div class="tech-grid" style="grid-template-columns: repeat(2, 1fr);">
+        <a href="{% url 'meetings:meeting_list' %}" class="tech-card" style="text-decoration: none; color: inherit;">
+            <h3 class="tech-card-title"><i class="fas fa-list"></i> 會議列表</h3>
+            <p class="tech-card-content">查看、編輯和管理所有會議記錄。</p>
+        </a>
+        <a href="{% url 'admin:index' %}" class="tech-card" style="text-decoration: none; color: inherit;">
+            <h3 class="tech-card-title"><i class="fas fa-user-cog"></i> 管理後台</h3>
+            <p class="tech-card-content">進入 Django 管理後台進行高級設定。</p>
+        </a>
+    </div>
+</div>
+{% endblock %}

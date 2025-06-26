@@ -1,0 +1,478 @@
+/* tech-style.css - 現代科技感風格 */
+
+:root {
+  --primary-color: #2c3e50;
+  --secondary-color: #3498db;
+  --accent-color: #00bcd4;
+  --success-color: #2ecc71;
+  --warning-color: #f39c12;
+  --danger-color: #e74c3c;
+  --dark-color: #1a1a2e;
+  --light-color: #f0f3f6;
+  --border-radius: 4px;
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --transition: all 0.3s ease;
+  --gradient: linear-gradient(135deg, var(--secondary-color), var(--accent-color));
+}
+
+/* 基本風格 */
+body {
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(to bottom right, #f8f9fa, #e9ecef);
+  min-height: 100vh;
+}
+
+/* 科技感容器 */
+.tech-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 30px 20px;
+  background-color: white;
+  box-shadow: var(--box-shadow);
+  border-radius: var(--border-radius);
+  position: relative;
+  overflow: hidden;
+}
+
+.tech-container::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 5px;
+  background: var(--gradient);
+}
+
+/* 標題設計 */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  margin-top: 0;
+  color: var(--primary-color);
+}
+
+h1 {
+  font-size: 2.2rem;
+  margin-bottom: 1.5rem;
+  position: relative;
+  padding-bottom: 12px;
+}
+
+h1::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 80px;
+  background: var(--gradient);
+}
+
+h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+/* 導航欄 */
+.tech-navbar {
+  background-color: var(--dark-color);
+  padding: 15px 0;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 100;
+}
+
+.tech-nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.tech-brand {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+
+.tech-brand i {
+  margin-right: 10px;
+  color: var(--accent-color);
+}
+
+.tech-nav-links {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tech-nav-links li {
+  margin-left: 20px;
+}
+
+.tech-nav-links a {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--transition);
+  position: relative;
+  padding: 8px 0;
+}
+
+.tech-nav-links a:hover {
+  color: white;
+}
+
+.tech-nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 2px;
+  background: var(--secondary-color);
+  transition: var(--transition);
+}
+
+.tech-nav-links a:hover::after {
+  width: 100%;
+}
+
+/* 按鈕樣式 */
+.tech-btn {
+  display: inline-block;
+  padding: 10px 18px;
+  background: var(--secondary-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--transition);
+  text-align: center;
+  margin: 5px 0;
+}
+
+.tech-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(52, 152, 219, 0.3);
+}
+
+.tech-btn-primary {
+  background: var(--gradient);
+}
+
+.tech-btn-outline {
+  background: transparent;
+  border: 2px solid var(--secondary-color);
+  color: var(--secondary-color);
+}
+
+.tech-btn-outline:hover {
+  background: var(--secondary-color);
+  color: white;
+}
+
+.tech-btn-success {
+  background-color: var(--success-color);
+}
+
+.tech-btn-warning {
+  background-color: var(--warning-color);
+}
+
+.tech-btn-danger {
+  background-color: var(--danger-color);
+}
+
+/* 表單樣式 */
+.tech-form-group {
+  margin-bottom: 20px;
+}
+
+.tech-form-label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--primary-color);
+}
+
+.tech-form-control {
+  width: 100%;
+  padding: 12px 15px;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: var(--border-radius);
+  transition: var(--transition);
+}
+
+.tech-form-control:focus {
+  border-color: var(--secondary-color);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+.tech-file-input {
+  background-color: var(--light-color);
+  padding: 15px;
+  border-radius: var(--border-radius);
+  border: 2px dashed #ccc;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+}
+
+.tech-file-input:hover {
+  border-color: var(--secondary-color);
+}
+
+.tech-file-input input {
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.tech-file-input label {
+  display: block;
+  color: var(--primary-color);
+  font-weight: 500;
+  margin-bottom: 5px;
+}
+
+.tech-file-input-icon {
+  font-size: 2.5rem;
+  color: var(--secondary-color);
+  margin-bottom: 10px;
+}
+
+/* 卡片樣式 */
+.tech-card {
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  overflow: hidden;
+  transition: var(--transition);
+  margin-bottom: 20px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.tech-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.tech-card-header {
+  padding: 15px 20px;
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.tech-card-body {
+  padding: 20px;
+}
+
+.tech-card-footer {
+  padding: 15px 20px;
+  background-color: var(--light-color);
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* 表格樣式 */
+.tech-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  overflow: hidden;
+  box-shadow: var(--box-shadow);
+  border-radius: var(--border-radius);
+}
+
+.tech-table th {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 15px;
+  text-align: left;
+}
+
+.tech-table td {
+  padding: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.tech-table tbody tr:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.tech-table tbody tr:hover {
+  background-color: rgba(52, 152, 219, 0.05);
+}
+
+/* 輔助類 */
+.tech-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 30px;
+  color: white;
+  background: var(--secondary-color);
+}
+
+.tech-badge-success {
+  background-color: var(--success-color);
+}
+
+.tech-badge-warning {
+  background-color: var(--warning-color);
+}
+
+.tech-badge-danger {
+  background-color: var(--danger-color);
+}
+
+.tech-alert {
+  padding: 15px;
+  margin: 20px 0;
+  border-radius: var(--border-radius);
+  position: relative;
+}
+
+.tech-alert-success {
+  background-color: rgba(46, 204, 113, 0.2);
+  border-left: 5px solid var(--success-color);
+}
+
+.tech-alert-warning {
+  background-color: rgba(243, 156, 18, 0.2);
+  border-left: 5px solid var(--warning-color);
+}
+
+.tech-alert-danger {
+  background-color: rgba(231, 76, 60, 0.2);
+  border-left: 5px solid var(--danger-color);
+}
+
+/* 科技感裝飾 */
+.tech-glow {
+  position: fixed;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(rgba(52, 152, 219, 0.2), transparent 70%);
+  z-index: -1;
+}
+
+.tech-glow:nth-child(1) {
+  top: -150px;
+  right: -150px;
+}
+
+.tech-glow:nth-child(2) {
+  bottom: -150px;
+  left: -150px;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+  .tech-container {
+    padding: 20px 15px;
+  }
+  
+  h1 {
+    font-size: 1.8rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  .tech-nav-container {
+    flex-direction: column;
+  }
+  
+  .tech-nav-links {
+    margin-top: 15px;
+  }
+  
+  .tech-nav-links li {
+    margin: 0 10px;
+  }
+}
+
+/* 自定義動畫效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tech-animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* 頁腳樣式 */
+.tech-footer {
+  background-color: var(--dark-color);
+  color: rgba(255, 255, 255, 0.7);
+  padding: 30px 0;
+  margin-top: 50px;
+}
+
+.tech-footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.tech-footer-section {
+  margin-bottom: 20px;
+}
+
+.tech-footer h3 {
+  color: white;
+  font-size: 1.2rem;
+  margin-bottom: 15px;
+}
+
+.tech-footer a {
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.tech-footer a:hover {
+  color: var(--accent-color);
+}
+
+.tech-footer-bottom {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 20px;
+}

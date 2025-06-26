@@ -1,13 +1,100 @@
-<!DOCTYPE html>
-<html>
-<head><title>上傳附件</title></head>
-<body>
-    <h1>上傳附件 - 會議 ID: {{ meeting_id }}</h1>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="file" name="attachment_file">
-        <button type="submit">上傳</button>
-    </form>
-    <a href="{% url 'meetings:meeting_detail' meeting_id %}">返回</a>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}上傳附件 | 會議管理系統{% endblock %}
+
+{% block content %}
+<div class="tech-header">
+    <div class="tech-header-icon">
+        <i class="fas fa-cloud-upload-alt"></i>
+    </div>
+    <h1 class="tech-title">上傳附件</h1>
+</div>
+
+<div class="tech-section">
+    <div class="tech-alert tech-alert-info">
+        <div class="tech-alert-icon">
+            <i class="fas fa-info-circle"></i>
+        </div>
+        <div class="tech-alert-content">
+            <div class="tech-alert-title">上傳指引</div>
+            <p>您正在為會議 ID: {{ meeting_id }} 上傳附件。檔案將自動命名為有意義的名稱格式：日期_會議標題_原檔名。</p>
+        </div>
+    </div>
+
+    <div class="tech-card">
+        <h2 class="tech-subtitle"><i class="fas fa-upload"></i> 選擇檔案</h2>
+        <form method="post" enctype="multipart/form-data" id="uploadForm">
+            {% csrf_token %}
+            <div class="tech-file-upload">
+                <input type="file" name="attachment_file" id="attachment_file" required>
+                <div class="tech-file-icon">
+                    <i class="fas fa-file-upload"></i>
+                </div>
+                <div class="tech-file-text">拖放檔案到此處或點擊上傳</div>
+                <div class="tech-file-info">支援各種文件格式</div>
+            </div>
+            <div class="tech-file-name" id="fileName" style="display: none;">
+                <i class="fas fa-file"></i> <span id="selectedFileName">尚未選擇檔案</span>
+            </div>
+            <button type="submit" class="tech-btn tech-btn-block">
+                <i class="fas fa-cloud-upload-alt"></i> 上傳附件
+            </button>
+        </form>
+    </div>
+</div>
+
+<a href="{% url 'meetings:meeting_detail' meeting_id %}" class="tech-btn tech-btn-outline" style="margin-top: 20px;">
+    <i class="fas fa-arrow-left"></i> 返回會議詳情
+</a>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('attachment_file').addEventListener('change', function(e) {
+        const fileName = e.target.files[0] ? e.target.files[0].name : '尚未選擇檔案';
+        document.getElementById('selectedFileName').textContent = fileName;
+        document.getElementById('fileName').style.display = 'block';
+    });
+    
+    // 拖放功能
+    const dropArea = document.querySelector('.tech-file-upload');
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, preventDefaults, false);
+    });
+    
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    ['dragenter', 'dragover'].forEach(eventName => {
+        dropArea.addEventListener(eventName, highlight, false);
+    });
+    
+    ['dragleave', 'drop'].forEach(eventName => {
+        dropArea.addEventListener(eventName, unhighlight, false);
+    });
+    
+    function highlight() {
+        dropArea.style.background = 'rgba(52, 152, 219, 0.2)';
+        dropArea.style.borderColor = '#3498db';
+    }
+    
+    function unhighlight() {
+        dropArea.style.background = 'rgba(52, 152, 219, 0.05)';
+        dropArea.style.borderColor = 'rgba(52, 152, 219, 0.3)';
+    }
+    
+    dropArea.addEventListener('drop', handleDrop, false);
+    
+    function handleDrop(e) {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        document.getElementById('attachment_file').files = files;
+        
+        const event = new Event('change');
+        document.getElementById('attachment_file').dispatchEvent(event);
+    }
+</script>
+{% endblock %}

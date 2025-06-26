@@ -1,80 +1,197 @@
-<!-- templates/meetings/meeting_list.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <title>會議列表</title>
-</head>
-<body>
-    <h1>會議列表</h1>
+{% extends "base.html" %}
 
-    <!-- 搜索和過濾表單 -->
-    <div class="filter-form">
-        <form method="get">
-            <input type="text" name="q" value="{{ search_query|default:'' }}" placeholder="搜索標題或參加人...">
-            <input type="date" name="date" value="{{ date_filter|default:'' }}" placeholder="過濾日期...">
-            <input type="text" name="location" value="{{ location_filter|default:'' }}" placeholder="過濾地點...">
-            <select name="sort">
-                <option value="-date" {% if sort_by == '-date' %}selected{% endif %}>日期降序</option>
-                <option value="date" {% if sort_by == 'date' %}selected{% endif %}>日期升序</option>
-                <option value="-title" {% if sort_by == '-title' %}selected{% endif %}>標題降序</option>
-                <option value="title" {% if sort_by == 'title' %}selected{% endif %}>標題升序</option>
+{% block title %}會議列表 | 會議管理系統{% endblock %}
+
+{% block content %}
+<div class="tech-header">
+    <div class="tech-header-icon">
+        <i class="fas fa-list-alt"></i>
+    </div>
+    <h1 class="tech-title">會議列表</h1>
+</div>
+
+<!-- 搜索和過濾面板 -->
+<div class="tech-section">
+    <h2 class="tech-subtitle"><i class="fas fa-filter"></i> 搜索與過濾</h2>
+    <form method="get" class="tech-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+        <div class="tech-form-group">
+            <label class="tech-label">會議標題或參加人</label>
+            <input type="text" name="q" value="{{ search_query|default:'' }}" class="tech-input" placeholder="輸入關鍵字搜索...">
+        </div>
+        <div class="tech-form-group">
+            <label class="tech-label">會議日期</label>
+            <input type="date" name="date" value="{{ date_filter|default:'' }}" class="tech-input">
+        </div>
+        <div class="tech-form-group">
+            <label class="tech-label">會議地點</label>
+            <input type="text" name="location" value="{{ location_filter|default:'' }}" class="tech-input" placeholder="輸入地點關鍵字...">
+        </div>
+        <div class="tech-form-group">
+            <label class="tech-label">排序方式</label>
+            <select name="sort" class="tech-select">
+                <option value="-date" {% if sort_by == '-date' %}selected{% endif %}>日期新到舊</option>
+                <option value="date" {% if sort_by == 'date' %}selected{% endif %}>日期舊到新</option>
+                <option value="-title" {% if sort_by == '-title' %}selected{% endif %}>標題 Z-A</option>
+                <option value="title" {% if sort_by == 'title' %}selected{% endif %}>標題 A-Z</option>
             </select>
-            <button type="submit">應用</button>
-            <a href="{% url 'meetings:meeting_list' %}">重置</a>
-        </form>
+        </div>
+        <div class="tech-form-group" style="display: flex; align-items: flex-end;">
+            <button type="submit" class="tech-btn">
+                <i class="fas fa-search"></i> 搜索
+            </button>
+            <a href="{% url 'meetings:meeting_list' %}" class="tech-btn tech-btn-outline" style="margin-left: 10px;">
+                <i class="fas fa-redo"></i> 重置
+            </a>
+        </div>
+    </form>
+</div>
+
+<!-- 會議列表 -->
+<div class="tech-section">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 class="tech-subtitle"><i class="fas fa-calendar-alt"></i> 會議清單</h2>
+        <div>
+            <a href="{% url 'meetings:import_meetings' %}" class="tech-btn">
+                <i class="fas fa-file-import"></i> 匯入會議
+            </a>
+            <a href="{% url 'meetings:export_meetings' %}" class="tech-btn tech-btn-success">
+                <i class="fas fa-file-export"></i> 匯出會議
+            </a>
+        </div>
     </div>
 
     {% if page_obj %}
-        <form method="post" action="{% url 'meetings:delete_selected_meetings' %}" class="delete-form" onsubmit="return confirm('確定刪除所選會議？');">
+        <form method="post" action="{% url 'meetings:delete_selected_meetings' %}" id="meetingsForm" onsubmit="return confirm('確定刪除所選會議？');">
             {% csrf_token %}
-            <ul>
-            {% for meeting in page_obj %}
-                <li>
-                    <input type="checkbox" name="selected_meetings" value="{{ meeting.id }}">
-                    <a href="{% url 'meetings:meeting_detail' meeting.id %}">
-                        {{ meeting.title }} ({{ meeting.date }})
-                    </a>
-                    <a href="{% url 'meetings:upload_attachment' meeting.id %}">上傳附件</a>
-                    <a href="{% url 'meetings:delete_meeting' meeting.id %}" onclick="return confirm('確定刪除此會議？')">清除</a>
-                </li>
-            {% endfor %}
-            </ul>
-            <button type="submit">清除所有選中項目</button>
+            <table class="tech-table">
+                <thead>
+                    <tr>
+                        <th width="5%"><input type="checkbox" id="selectAll"></th>
+                        <th width="35%">會議標題</th>
+                        <th width="15%">日期</th>
+                        <th width="15%">地點</th>
+                        <th width="30%">操作</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for meeting in page_obj %}
+                    <tr>
+                        <td>
+                            <input type="checkbox" name="selected_meetings" value="{{ meeting.id }}" class="meeting-checkbox">
+                        </td>
+                        <td>
+                            <a href="{% url 'meetings:meeting_detail' meeting.id %}" class="tech-card-title">
+                                {{ meeting.title }}
+                            </a>
+                        </td>
+                        <td>{{ meeting.date }}</td>
+                        <td>{{ meeting.location }}</td>
+                        <td>
+                            <a href="{% url 'meetings:meeting_detail' meeting.id %}" class="tech-btn tech-btn-sm">
+                                <i class="fas fa-eye"></i> 查看
+                            </a>
+                            <a href="{% url 'meetings:upload_attachment' meeting.id %}" class="tech-btn tech-btn-sm tech-btn-outline">
+                                <i class="fas fa-paperclip"></i> 附件
+                            </a>
+                            <a href="{% url 'meetings:delete_meeting' meeting.id %}" class="tech-btn tech-btn-sm tech-btn-danger" onclick="return confirm('確定刪除此會議？')">
+                                <i class="fas fa-trash"></i> 刪除
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <!-- 分頁資訊 -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0;">
+                <div>
+                    <button type="submit" class="tech-btn tech-btn-danger">
+                        <i class="fas fa-trash"></i> 刪除選中項目
+                    </button>
+                </div>
+                <div class="tech-card-content">
+                    每頁 {{ page_obj.paginator.per_page }} 筆，共 {{ page_obj.paginator.count }} 筆記錄 | 
+                    當前第 {{ page_obj.start_index }}-{{ page_obj.end_index }} 筆
+                </div>
+            </div>
         </form>
-
-        <!-- 顯示每頁數量和總數 -->
-        <p>每頁顯示 {{ page_obj.paginator.per_page }} 筆記錄，總計 {{ page_obj.paginator.count }} 筆記錄</p>
-        <p>當前顯示第 {{ page_obj.start_index }} 到 {{ page_obj.end_index }} 筆記錄</p>
         
         <!-- 分頁導航 -->
-        <div class="pagination">
+        <div class="tech-pagination">
             {% if page_obj.has_previous %}
-                <a href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if date_filter %}date={{ date_filter }}&{% endif %}{% if location_filter %}location={{ location_filter }}&{% endif %}page=1">« 第一頁</a>
-                <a href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if date_filter %}date={{ date_filter }}&{% endif %}{% if location_filter %}location={{ location_filter }}&{% endif %}page={{ page_obj.previous_page_number }}">上一頁</a>
+                <div class="tech-page-item">
+                    <a href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if date_filter %}date={{ date_filter }}&{% endif %}{% if location_filter %}location={{ location_filter }}&{% endif %}page=1" class="tech-page-link tech-page-prev">
+                        <i class="fas fa-angle-double-left"></i> 第一頁
+                    </a>
+                </div>
+                <div class="tech-page-item">
+                    <a href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if date_filter %}date={{ date_filter }}&{% endif %}{% if location_filter %}location={{ location_filter }}&{% endif %}page={{ page_obj.previous_page_number }}" class="tech-page-link tech-page-prev">
+                        <i class="fas fa-angle-left"></i> 上一頁
+                    </a>
+                </div>
             {% endif %}
 
             {% for num in page_obj.paginator.page_range %}
-                <a href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if date_filter %}date={{ date_filter }}&{% endif %}{% if location_filter %}location={{ location_filter }}&{% endif %}sort={{ sort_by }}&page={{ num }}"
-                   class="{% if page_obj.number == num %}active{% endif %}">{{ num }}</a>
+                {% if num == page_obj.number %}
+                <div class="tech-page-item">
+                    <span class="tech-page-link active">{{ num }}</span>
+                </div>
+                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <div class="tech-page-item">
+                    <a href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if date_filter %}date={{ date_filter }}&{% endif %}{% if location_filter %}location={{ location_filter }}&{% endif %}sort={{ sort_by }}&page={{ num }}" class="tech-page-link">
+                        {{ num }}
+                    </a>
+                </div>
+                {% endif %}
             {% endfor %}
 
             {% if page_obj.has_next %}
-                <a href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if date_filter %}date={{ date_filter }}&{% endif %}{% if location_filter %}location={{ location_filter }}&{% endif %}page={{ page_obj.next_page_number }}">下一頁</a>
-                <a href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if date_filter %}date={{ date_filter }}&{% endif %}{% if location_filter %}location={{ location_filter }}&{% endif %}page={{ page_obj.paginator.num_pages }}">» 最後一頁</a>
+                <div class="tech-page-item">
+                    <a href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if date_filter %}date={{ date_filter }}&{% endif %}{% if location_filter %}location={{ location_filter }}&{% endif %}page={{ page_obj.next_page_number }}" class="tech-page-link tech-page-next">
+                        下一頁 <i class="fas fa-angle-right"></i>
+                    </a>
+                </div>
+                <div class="tech-page-item">
+                    <a href="?{% if search_query %}q={{ search_query }}&{% endif %}{% if date_filter %}date={{ date_filter }}&{% endif %}{% if location_filter %}location={{ location_filter }}&{% endif %}page={{ page_obj.paginator.num_pages }}" class="tech-page-link tech-page-next">
+                        最後頁 <i class="fas fa-angle-double-right"></i>
+                    </a>
+                </div>
             {% endif %}
-            <span>共 {{ page_obj.paginator.num_pages }} 頁，當前第 {{ page_obj.number }} 頁</span>
         </div>
     {% else %}
-        <p>暫無會議記錄。</p>
+        <div class="tech-alert tech-alert-info">
+            <div class="tech-alert-icon">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <div class="tech-alert-content">
+                <div class="tech-alert-title">暫無會議記錄</div>
+                <p>目前系統中沒有任何會議記錄。您可以匯入資料或從管理後台新增會議。</p>
+            </div>
+        </div>
     {% endif %}
 
     <!-- 刪除全部按鈕 -->
-    <form method="post" action="{% url 'meetings:delete_all_meetings' %}" style="display:inline;">
-        {% csrf_token %}
-        <button type="submit" class="delete-button" onclick="return confirm('確定要刪除所有會議？此操作無法復原！');">刪除全部</button>
-    </form> |
-    <a href="{% url 'pages:home' %}">返回首頁</a> |
-    <a href="{% url 'meetings:import_meetings' %}">導入會議</a> |
-    <a href="{% url 'meetings:export_meetings' %}">導出會議</a>
-</body>
-</html>
+    <div class="tech-section" style="background-color: #fff3f3; border: 1px solid #ffcccc;">
+        <h2 class="tech-subtitle"><i class="fas fa-exclamation-triangle" style="color: #e74c3c;"></i> 危險操作區</h2>
+        <p style="margin-bottom: 15px;">以下操作會永久刪除資料，請謹慎操作：</p>
+        <form method="post" action="{% url 'meetings:delete_all_meetings' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="tech-btn tech-btn-danger" onclick="return confirm('警告：此操作將刪除所有會議記錄，包括附件和議程！\n\n此操作無法復原！\n\n確定要繼續嗎？');">
+                <i class="fas fa-trash-alt"></i> 刪除所有會議記錄
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // 全選/取消全選功能
+    document.getElementById('selectAll').addEventListener('change', function() {
+        const checkboxes = document.querySelectorAll('.meeting-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+    });
+</script>
+{% endblock %}

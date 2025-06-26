@@ -1,48 +1,138 @@
-<!-- templates/meetings/meeting_detail.html -->
-<!DOCTYPE html>
-<html>
+{% extends "base.html" %}
 
-<head>
-    <title>{{ meeting.title }}</title>
-</head>
+{% block title %}{{ meeting.title }} | 會議管理系統{% endblock %}
 
-<body>
-    <h1>{{ meeting.title }}</h1>
-    <p><strong>日期:</strong> {{ meeting.date }}</p>
-    <p><strong>時間:</strong> {{ meeting.start_time }} - {{ meeting.end_time }}</p>
-    <p><strong>地點:</strong> {{ meeting.location }}</p>
-    <p><strong>參加人:</strong> {{ meeting.attendees }}</p>
-    <p><strong>記錄:</strong> {{ meeting.minutes|default:"無記錄" }}</p>
+{% block content %}
+<div class="tech-header">
+    <div class="tech-header-icon">
+        <i class="fas fa-calendar-check"></i>
+    </div>
+    <h1 class="tech-title">{{ meeting.title }}</h1>
+</div>
 
-    <h2>議程</h2>
+<div class="tech-section">
+    <div class="tech-card">
+        <h2 class="tech-subtitle"><i class="fas fa-info-circle"></i> 會議資訊</h2>
+        <div class="tech-grid" style="grid-template-columns: 1fr 1fr;">
+            <div class="tech-card-content">
+                <p><i class="far fa-calendar-alt"></i> <strong>日期:</strong> {{ meeting.date }}</p>
+                <p><i class="far fa-clock"></i> <strong>時間:</strong> {{ meeting.start_time }} - {{ meeting.end_time }}</p>
+                <p><i class="fas fa-map-marker-alt"></i> <strong>地點:</strong> {{ meeting.location }}</p>
+            </div>
+            <div class="tech-card-content">
+                <p><i class="fas fa-users"></i> <strong>參加人:</strong> {{ meeting.attendees }}</p>
+                <p><i class="fas fa-file-alt"></i> <strong>記錄:</strong> {{ meeting.minutes|default:"無記錄" }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="tech-section">
+    <h2 class="tech-subtitle"><i class="fas fa-tasks"></i> 議程</h2>
     {% if agenda_items %}
-    <ul>
-        {% for item in agenda_items %}
-        <li>{{ item.item_number }}. {{ item.item_title }} - {{ item.description }} (負責人: {{ item.responsible_person }},
-            時間: {{ item.estimated_time }})</li>
-        {% endfor %}
-    </ul>
+    <table class="tech-table">
+        <thead>
+            <tr>
+                <th width="5%">項次</th>
+                <th width="30%">議程項目</th>
+                <th width="35%">描述</th>
+                <th width="15%">負責人</th>
+                <th width="15%">預估時間</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in agenda_items %}
+            <tr>
+                <td>{{ item.item_number }}</td>
+                <td>{{ item.item_title }}</td>
+                <td>{{ item.description }}</td>
+                <td>{{ item.responsible_person }}</td>
+                <td>{{ item.estimated_time }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     {% else %}
-    <p>暫無議程。</p>
+    <div class="tech-alert tech-alert-info">
+        <div class="tech-alert-icon">
+            <i class="fas fa-info-circle"></i>
+        </div>
+        <div class="tech-alert-content">
+            <p>暫無議程項目。</p>
+        </div>
+    </div>
     {% endif %}
+</div>
 
-    <h2>附件</h2>
+<div class="tech-section">
+    <h2 class="tech-subtitle"><i class="fas fa-paperclip"></i> 附件</h2>
     {% if attachments %}
-    <ul>
-        {% for attachment in attachments %}
-        <li><a href="{{ attachment.file.url }}">{{ attachment.file.name }}</a> (上傳時間: {{
-            attachment.uploaded_at|default:"未知" }})</li>
-        {% endfor %}
-    </ul>
+    <table class="tech-table">
+        <thead>
+            <tr>
+                <th width="60%">檔案名稱</th>
+                <th width="20%">上傳時間</th>
+                <th width="20%">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for attachment in attachments %}
+            <tr>
+                <td>
+                    <a href="{{ attachment.file.url }}" target="_blank" class="tech-card-title">
+                        <i class="fas fa-file"></i> {{ attachment.file.name }}
+                    </a>
+                </td>
+                <td>{{ attachment.uploaded_at|default:"未知" }}</td>
+                <td>
+                    <form method="post" action="{% url 'meetings:delete_attachment' attachment.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="tech-btn tech-btn-danger tech-btn-sm" onclick="return confirm('確定要刪除此附件嗎？')">
+                            <i class="fas fa-trash"></i> 刪除
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
     {% else %}
-    <p>暫無附件。</p>
+    <div class="tech-alert tech-alert-info">
+        <div class="tech-alert-icon">
+            <i class="fas fa-info-circle"></i>
+        </div>
+        <div class="tech-alert-content">
+            <p>暫無附件。</p>
+        </div>
+    </div>
     {% endif %}
+    
+    <div style="margin-top: 20px;">
+        <a href="{% url 'meetings:upload_attachment' meeting.id %}" class="tech-btn">
+            <i class="fas fa-cloud-upload-alt"></i> 上傳新附件
+        </a>
+    </div>
+</div>
 
-    <a href="{% url 'meetings:upload_attachment' meeting.id %}">上傳新附件</a> |
-    <a href="{% url 'meetings:generate_meeting_doc' meeting.id %}">生成 Word 文件</a> |
-<a href="{% url 'meetings:delete_meeting' meeting.id %}" class="clear-btn" onclick="return confirm('確定刪除此會議？')">清除</a> |
-    <a href="{% url 'meetings:meeting_list' %}">返回會議列表</a> |
-    <a href="{% url 'pages:home' %}">返回首頁</a>
-</body>
-
-</html>
+<div class="tech-section" style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: space-between;">
+    <div>
+        <a href="{% url 'meetings:generate_meeting_doc' meeting.id %}" class="tech-btn tech-btn-success">
+            <i class="far fa-file-word"></i> 生成 Word 文件
+        </a>
+        
+        <a href="{% url 'meetings:meeting_list' %}" class="tech-btn tech-btn-outline">
+            <i class="fas fa-list"></i> 返回會議列表
+        </a>
+        
+        <a href="{% url 'pages:home' %}" class="tech-btn tech-btn-outline">
+            <i class="fas fa-home"></i> 返回首頁
+        </a>
+    </div>
+    
+    <div>
+        <a href="{% url 'meetings:delete_meeting' meeting.id %}" class="tech-btn tech-btn-danger" onclick="return confirm('確定刪除此會議？')">
+            <i class="fas fa-trash"></i> 刪除此會議
+        </a>
+    </div>
+</div>
+{% endblock %}
