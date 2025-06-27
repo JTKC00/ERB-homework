@@ -3,6 +3,24 @@
 {% block title %}{{ meeting.title }} | 會議管理系統{% endblock %}
 
 {% block content %}
+{% if edit_mode %}
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="tech-btn tech-btn-primary">儲存</button>
+    <a href="{% url 'meetings:meeting_detail' meeting.id %}" class="tech-btn">取消</a>
+  </form>
+{% else %}
+  <!-- 原本的會議詳情顯示 -->
+  <h2>{{ meeting.title }}</h2>
+  <p>日期：{{ meeting.date }}</p>
+  <p>時間：{{ meeting.start_time }} - {{ meeting.end_time }}</p>
+  <p>地點：{{ meeting.location }}</p>
+  <p>參加人：{{ meeting.attendees }}</p>
+  <p>記錄：{{ meeting.minutes }}</p>
+  <a href="?edit=1" class="tech-btn tech-btn-primary">編輯</a>
+{% endif %}
+
 <div class="tech-header">
     <div class="tech-header-icon">
         <i class="fas fa-calendar-check"></i>
@@ -33,21 +51,27 @@
     <table class="tech-table">
         <thead>
             <tr>
+                <th width="5%"></th> <!-- 拖拉手柄 -->
                 <th width="5%">項次</th>
                 <th width="30%">議程項目</th>
                 <th width="35%">描述</th>
                 <th width="15%">負責人</th>
                 <th width="15%">預估時間</th>
+                <th width="10%">操作</th>
             </tr>
         </thead>
-        <tbody>
-            {% for item in agenda_items %}
-            <tr>
+        <tbody id="agenda-tbody">
+            {% for item in agenda_items|dictsort:"item_number" %}
+            <tr data-id="{{ item.id }}">
+                <td style="cursor:move;"><i class="fas fa-bars"></i></td>
                 <td>{{ item.item_number }}</td>
                 <td>{{ item.item_title }}</td>
                 <td>{{ item.description }}</td>
                 <td>{{ item.responsible_person }}</td>
                 <td>{{ item.estimated_time }}</td>
+                <td>
+                    <a href="?edit_agenda={{ item.id }}" class="tech-btn tech-btn-primary tech-btn-sm">編輯</a>
+                </td>
             </tr>
             {% endfor %}
         </tbody>
@@ -135,4 +159,56 @@
         </a>
     </div>
 </div>
+
+{% for item in agenda_items %}
+  <div class="tech-card">
+    {% if edit_agenda_id and edit_agenda_id|add:""|stringformat:"s" == item.id|stringformat:"s" %}
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="agenda_form" value="1">
+        <input type="hidden" name="agenda_id" value="{{ item.id }}">
+        {{ agenda_form.as_p }}
+        <button type="submit" class="tech-btn tech-btn-primary">儲存</button>
+        <a href="{% url 'meetings:meeting_detail' meeting.id %}" class="tech-btn">取消</a>
+      </form>
+    {% else %}
+      <b>{{ item.item_number }}. {{ item.item_title }}</b>
+      <p>{{ item.description }}</p>
+      <p>負責人：{{ item.responsible_person }}，預計時間：{{ item.estimated_time }}</p>
+      <a href="?edit_agenda={{ item.id }}" class="tech-btn tech-btn-primary">編輯議程</a>
+    {% endif %}
+  </div>
+{% endfor %}
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var tbody = document.getElementById('agenda-tbody');
+    if (tbody) {
+        new Sortable(tbody, {
+            animation: 150,
+            handle: '.fa-bars', // 只允許拖拉icon拖動
+            onEnd: function (evt) {
+                let ids = [];
+                tbody.querySelectorAll('tr').forEach(function(row){
+                    ids.push(row.getAttribute('data-id'));
+                });
+                fetch("{% url 'meetings:reorder_agenda' meeting.id %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({ids: ids})
+                }).then(resp => resp.json()).then(data => {
+                    if(data.status === "ok") {
+                        location.reload();
+                    }
+                });
+            }
+        });
+    }
+});
+</script>
+
 {% endblock %}

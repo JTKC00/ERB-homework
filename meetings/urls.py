@@ -14,4 +14,5 @@ urlpatterns = [
     path('delete-selected/', views.delete_selected_meetings, name='delete_selected_meetings'),  # 新增批量刪除路由
     path('delete_all/', views.delete_all_meetings, name='delete_all_meetings'),  # 新增批量刪除所有會議路由
     path('attachment/<int:attachment_id>/delete/', views.delete_attachment, name='delete_attachment'),  # 刪除附件路由
+    path('meeting/<int:meeting_id>/reorder_agenda/', views.reorder_agenda, name='reorder_agenda'),
 ]

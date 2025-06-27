@@ -1,52 +1,31 @@
-import os
-import csv
-import re
-import tempfile
-import shutil
-from io import StringIO
-from datetime import timedelta
-from django.shortcuts import render, redirect, get_object_or_404
-from .models import Meeting, AgendaItem, Attachment
-from docx import Document
-from django.core.files.storage import default_storage
-from django.http import HttpResponse, HttpResponseBadRequest
-from .resources import MeetingWithDetailsResource
-from tablib import Dataset
-from django.core.paginator import Paginator
-import zipfile
-from django.core.exceptions import ObjectDoesNotExist
-from django.utils.text import slugify
-from django.db.models import Q
-from django.contrib import messages
+import os # os 用於處理檔案和目錄
+import csv # csv 用於處理 CSV 檔案
+import re # re 用於正則表達式處理
+import tempfile # tempfile 用於創建臨時目錄
+import shutil # shutil 用於檔案和目錄的高級操作
+from io import StringIO # StringIO 用於處理字串作為檔案
+from datetime import timedelta # timedelta 用於處理時間差
+from django.shortcuts import render, redirect, get_object_or_404 # render 用於渲染模板，redirect 用於重定向，get_object_or_404 用於獲取物件或返回 404
+from .models import Meeting, AgendaItem, Attachment 
+from .forms import MeetingForm, AgendaItemForm # MeetingForm 用於處理會議表單
+from docx import Document # Document 用於處理 Word 檔案
+from django.core.files.storage import default_storage # default_storage 用於處理檔案儲存
+from django.http import HttpResponse, HttpResponseBadRequest # HttpResponse 用於返回 HTTP 響應，HttpResponseBadRequest 用於返回 400 錯誤
+from .resources import MeetingWithDetailsResource 
+from tablib import Dataset # Dataset 用於處理資料集
+from django.core.paginator import Paginator 
+import zipfile # zipfile 用於處理 ZIP 檔案
+from django.core.exceptions import ObjectDoesNotExist # ObjectDoesNotExist 用於處理物件不存在的情況
+from django.utils.text import slugify # slugify 用於生成 URL 安全的字串
+from django.db.models import Q # Q 用於複雜查詢
+from django.contrib import messages # messages 用於顯示用戶消息
+from django.core.files import File # File 用於處理檔案儲存
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
+
 
 # Create your views here.
-
-def meeting_detail(request, meeting_id):
-    meeting = Meeting.objects.get(id=meeting_id)
-    agenda_items = AgendaItem.objects.filter(meeting=meeting)
-    attachments = Attachment.objects.filter(meeting=meeting)
-    return render(request, 'meetings/meeting_detail.html', {
-        'meeting': meeting,
-        'agenda_items': agenda_items,
-        'attachments': attachments,
-    })
-
-def upload_attachment(request, meeting_id):
-    if request.method == 'POST' and request.FILES.get('attachment_file'):
-        meeting = Meeting.objects.get(id=meeting_id)
-        uploaded_file = request.FILES['attachment_file']
-        
-        # 創建有意義的檔案名稱：日期_會議標題_原檔名
-        date_str = meeting.date.strftime('%Y%m%d')
-        title_slug = slugify(meeting.title)[:30]  # 限制標題長度
-        original_name = uploaded_file.name
-        file_extension = os.path.splitext(original_name)[1]
-        meaningful_filename = f"{date_str}_{title_slug}_{original_name}"
-        
-        attachment = Attachment(meeting=meeting)
-        attachment.file.save(meaningful_filename, uploaded_file, save=True)
-        return redirect('meetings:meeting_detail', meeting_id=meeting.id)
-    return render(request, 'meetings/upload.html', {'meeting_id': meeting_id})
 
 def export_meetings(request):
     # 創建臨時目錄
@@ -190,7 +169,7 @@ def import_meetings(request):
                                                         attachment_file_path = os.path.join(temp_dir, 'attachments', file_name)
                                                         if os.path.exists(attachment_file_path):
                                                             # 複製檔案到 media 目錄
-                                                            from django.core.files import File
+
                                                             with open(attachment_file_path, 'rb') as f:
                                                                 django_file = File(f, name=file_name)
                                                                 Attachment.objects.create(
@@ -315,13 +294,36 @@ def import_meetings(request):
     return render(request, 'import/import_form.html')
 
 def meeting_detail(request, meeting_id):
-    meeting = Meeting.objects.get(id=meeting_id)
+    meeting = get_object_or_404(Meeting, id=meeting_id)
     agenda_items = AgendaItem.objects.filter(meeting=meeting)
     attachments = Attachment.objects.filter(meeting=meeting)
+
+    edit_agenda_id = request.GET.get('edit_agenda')
+    agenda_form = None
+
+    if request.method == 'POST' and 'agenda_form' in request.POST:
+        agenda_id = request.POST.get('agenda_id')
+        agenda_item = get_object_or_404(AgendaItem, id=agenda_id)
+        agenda_form = AgendaItemForm(request.POST, instance=agenda_item)
+        if agenda_form.is_valid():
+            agenda_form.save()
+            messages.success(request, "議程已更新")
+            return redirect('meetings:meeting_detail', meeting_id=meeting_id)
+    elif edit_agenda_id:
+        # 進入編輯模式時，產生對應議程的表單
+        agenda_item = get_object_or_404(AgendaItem, id=edit_agenda_id)
+        agenda_form = AgendaItemForm(instance=agenda_item)
+
+    form = MeetingForm(instance=meeting)
+
     return render(request, 'meetings/meeting_detail.html', {
         'meeting': meeting,
         'agenda_items': agenda_items,
         'attachments': attachments,
+        'form': form,
+        'edit_mode': request.GET.get('edit') == '1',
+        'agenda_form': agenda_form,
+        'edit_agenda_id': edit_agenda_id,
     })
 
 def meeting_list(request):
@@ -365,6 +367,23 @@ def meeting_list(request):
         'sort_by': sort_by,
     }
     return render(request, 'meetings/meeting_list.html', context)
+
+def upload_attachment(request, meeting_id):
+    if request.method == 'POST' and request.FILES.get('attachment_file'):
+        meeting = Meeting.objects.get(id=meeting_id)
+        uploaded_file = request.FILES['attachment_file']
+        
+        # 創建有意義的檔案名稱：日期_會議標題_原檔名
+        date_str = meeting.date.strftime('%Y%m%d')
+        title_slug = slugify(meeting.title)[:30]  # 限制標題長度
+        original_name = uploaded_file.name
+        file_extension = os.path.splitext(original_name)[1]
+        meaningful_filename = f"{date_str}_{title_slug}_{original_name}"
+        
+        attachment = Attachment(meeting=meeting)
+        attachment.file.save(meaningful_filename, uploaded_file, save=True)
+        return redirect('meetings:meeting_detail', meeting_id=meeting.id)
+    return render(request, 'meetings/upload.html', {'meeting_id': meeting_id})
 
 def delete_meeting(request, meeting_id):
     meeting = get_object_or_404(Meeting, id=meeting_id)
@@ -486,3 +505,13 @@ def delete_attachment(request, attachment_id):
         
     # 無論是 GET 還是 POST 請求，都會重定向回會議詳情頁
     return redirect('meetings:meeting_detail', meeting_id=meeting_id)
+
+@csrf_exempt
+def reorder_agenda(request, meeting_id):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        ids = data.get("ids", [])
+        for idx, agenda_id in enumerate(ids, start=1):
+            AgendaItem.objects.filter(id=agenda_id, meeting_id=meeting_id).update(item_number=idx)
+        return JsonResponse({"status": "ok"})
+    return JsonResponse({"status": "fail"}, status=400)
